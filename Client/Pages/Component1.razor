@@ -1,0 +1,57 @@
+﻿@page "/Component1"
+@inject Test.Shared.StateContainer StateContainer
+@implements IDisposable
+
+<h1>Component 1</h1>
+
+<p>Component 1 Property: <b>@StateContainer.Property</b></p>
+<div>testtesttest</div>
+<tbody>
+
+    @foreach (var publisher in StateContainer.publishers)
+    {
+<tr>
+    <td>@publisher.PublisherName</td>
+    <td>@publisher.PublisherId </td>
+    <td>@publisher.YearFunded</td>
+    <td>@publisher.YearClosed</td>
+</tr>
+            }
+    </tbody>
+    <p>
+        <button @onclick="AddStringToList">AddStringToList</button>
+    </p>
+    <p>
+        <button @onclick="ChangePropertyValue">Change Property from Component 1</button>
+    </p>
+
+    <Component2 />
+
+    @code {
+
+        private IList<string> StringList;
+        protected override void OnInitialized()
+        {
+            StateContainer.OnChange += StateHasChanged;
+        }
+
+        private void AddStringToList()
+        {
+            //StringList.Add("asddfg");
+            if (StateContainer.ListString == null)
+            {
+                StateContainer.ListString = new List<string>();
+            }
+            StateContainer.ListString.Add("asdffghhh");
+        }
+
+        private void ChangePropertyValue()
+        {
+            StateContainer.SetProperty($"New value set in Component 1 {DateTime.Now}");
+        }
+
+        public void Dispose()
+        {
+            StateContainer.OnChange -= StateHasChanged;
+        }
+    }

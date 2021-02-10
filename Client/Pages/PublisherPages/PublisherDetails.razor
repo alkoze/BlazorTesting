@@ -1,0 +1,58 @@
+﻿@page "/publisherView/{id:guid}"
+@inject HttpClient Http
+
+
+<h3>Publisher details </h3>
+@if (publisher != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Year Founded</th>
+                <th scope="col">Year Closed</th>
+                <th scope="col">Books</th>
+                <th scope="col">Id</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input placeholder=@publisher.PublisherName @bind="nameToEdit" /></td>
+                <td><input placeholder=@publisher.YearFunded @bind="yearFounedToEdit" /></td>
+                <td><input placeholder=@publisher.YearClosed @bind="yearClosedToEdit" /></td>
+                <td>@publisher.PublisherBooks</td>
+                <td>@publisher.PublisherId</td>
+                <td><button @onclick="Edit">Edit publisher</button></td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+
+    public Test.Shared.Publisher publisher { get; set; } = null;
+
+    private string nameToEdit;
+    private int yearFounedToEdit;
+    private int? yearClosedToEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"publisher/{id}");
+        nameToEdit = publisher.PublisherName;
+        yearFounedToEdit = publisher.YearFunded;
+        yearClosedToEdit = publisher.YearClosed;
+    }
+
+    private async Task Edit()
+    {
+        publisher.PublisherName = nameToEdit;
+        publisher.YearFunded = yearFounedToEdit;
+        publisher.YearClosed = yearClosedToEdit;
+        await Http.PutAsJsonAsync<Test.Shared.Publisher>("publisher", publisher);
+        await OnInitializedAsync();
+       // StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+    }
+}
