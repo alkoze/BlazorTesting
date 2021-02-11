@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Policy;
 using System.Threading.Tasks;
+using Test.Server.Data;
+using Test.Shared;
 using Publisher = Test.Shared.Publisher;
 namespace Test.Server.Controllers
 {
@@ -13,7 +15,8 @@ namespace Test.Server.Controllers
     [Route("[controller]")]
     public class PublisherController : ControllerBase
     {
-        private static List<Publisher> publishers { get; set; } = new List<Publisher>();
+        DataStorage dataStorage = new DataStorage();
+        private static List<Publisher> publishers { get; set; } = DataStorage.publishers;
         private readonly ILogger<PublisherController> _logger;
 
         public PublisherController(ILogger<PublisherController> logger)
@@ -24,7 +27,6 @@ namespace Test.Server.Controllers
         [HttpPost]
         public ActionResult<Publisher> Create(Publisher publisher)
         {
-            publisher.PublisherId = Guid.NewGuid();
             publishers.Add(publisher);
             return publisher;
         }
@@ -36,24 +38,20 @@ namespace Test.Server.Controllers
         [HttpGet("{id}")]
         public Publisher Get(Guid id)
         {
-            return publishers.FindAll(publisher => publisher.PublisherId == id).FirstOrDefault();
+            return dataStorage.GetPublisher(id);
         }
         [HttpDelete("{id}")]
         public ActionResult<string> Delete(Guid id)
         {
             publishers.RemoveAll(publisher => publisher.PublisherId == id);
+            dataStorage.DeleteBooksWhenPublisherRemoved(id);
+         //   bookController.DeleteBooksWhenPublisherRemoved(id);
             return "Deleted";
         }
         [HttpPut]
         public ActionResult<Publisher> Put(Publisher publisher)
         {
-            foreach(var publisherToChange in publishers.Where(p=> p.PublisherId == publisher.PublisherId))
-            {
-                publisherToChange.PublisherName = publisher.PublisherName;
-                publisherToChange.YearFunded = publisher.YearFunded;
-                publisherToChange.YearClosed = publisher.YearClosed;
-                publisherToChange.PublisherBooks = publisher.PublisherBooks;
-            }
+            publishers[publishers.FindIndex(p => p.PublisherId.Equals(publisher.PublisherId))] = publisher;
             return publisher;
         }
     }

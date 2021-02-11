@@ -1,6 +1,6 @@
 ﻿@page "/publisherView/{id:guid}"
 @inject HttpClient Http
-
+@inject NavigationManager NavigationManager
 
 <h3>Publisher details </h3>
 @if (publisher != null)
@@ -20,12 +20,17 @@
                 <td><input placeholder=@publisher.PublisherName @bind="nameToEdit" /></td>
                 <td><input placeholder=@publisher.YearFunded @bind="yearFounedToEdit" /></td>
                 <td><input placeholder=@publisher.YearClosed @bind="yearClosedToEdit" /></td>
-                <td>@publisher.PublisherBooks</td>
-                <td>@publisher.PublisherId</td>
-                <td><button @onclick="Edit">Edit publisher</button></td>
-            </tr>
-        </tbody>
-    </table>
+                <td>
+                    @foreach (var book in publisher.PublisherBooks)
+                    {
+                        <div><button @onclick="() => BookDetails(book.BookId)" type="button" class="btn btn-link">@book.BookName</button></div>
+                    }
+            </td>
+            <td>@publisher.PublisherId</td>
+            <td><button @onclick="Edit">Edit publisher</button></td>
+        </tr>
+    </tbody>
+</table>
 }
 
 @code {
@@ -37,6 +42,11 @@
     private string nameToEdit;
     private int yearFounedToEdit;
     private int? yearClosedToEdit;
+
+    private void BookDetails(Guid? id)
+    {
+        NavigationManager.NavigateTo("/bookview/" + id);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,6 +63,6 @@
         publisher.YearClosed = yearClosedToEdit;
         await Http.PutAsJsonAsync<Test.Shared.Publisher>("publisher", publisher);
         await OnInitializedAsync();
-       // StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+        // StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
     }
 }

@@ -8,6 +8,7 @@ using Test.Shared;
 using StateContainer = Test.Shared.StateContainer;
 using System.Net.Http;
 using System.Net.Http.Json;
+using Test.Server.Data;
 
 namespace Test.Server.Controllers
 {
@@ -15,22 +16,24 @@ namespace Test.Server.Controllers
     [Route("[controller]")]
     public class BookController : ControllerBase
     {
-        private static List<Book> books { get; set; } = new List<Book>();
+        private DataStorage dataStorage = new DataStorage();
+        private static List<Book> books { get; set; } = DataStorage.books;
         private readonly ILogger<BookController> _logger;
-
-        public BookController(HttpClient httpClient)
+       // private static ILogger<PublisherController> _publisherLogger;
+       // private PublisherController publisherController = new PublisherController(_publisherLogger);
+        public BookController(ILogger<BookController> logger)
         {
-            this.httpClient = httpClient;
+            _logger = logger;
         }
-
-        HttpClient httpClient;
 
         [HttpPost]
         public ActionResult<Book> Create(Book book)
         {
-            book.BookId = Guid.NewGuid();
+            Publisher publisher = dataStorage.GetPublisher(book.BookPublisherId);
+            book.BookPublisher.PublisherId = publisher.PublisherId;
+            book.BookPublisher.PublisherName = publisher.PublisherName;
             books.Add(book);
-          //  Publisher publisher = await httpClient.GetFromJsonAsync<Publisher>($"publisher/{book.BookPublisherId}");
+            dataStorage.AddBookToList(book.BookPublisherId, book);
             return book;
         }
         [HttpGet]
@@ -41,29 +44,22 @@ namespace Test.Server.Controllers
         [HttpGet("{id}")]
         public Book Get(Guid id)
         {
-            Console.WriteLine("worked");
-            Console.WriteLine(id);
             return books.FindAll(book => book.BookId == id).FirstOrDefault();
         }
         [HttpDelete("{id}")]
         public ActionResult<string> Delete(Guid id)
         {
-            Console.WriteLine("worked");
+            Book book = books.FindAll(book => book.BookId == id).FirstOrDefault();
+            dataStorage.DeleteBookFromPublisher(book.BookPublisherId, id);
             books.RemoveAll(book => book.BookId == id);
             return "Deleted";
         }
         [HttpPut]
         public ActionResult<Book> Put(Book book)
         {
-            foreach (var bookToChange in books.Where(b => b.BookId == book.BookId))
-            {
-                bookToChange.BookName = book.BookName;
-                bookToChange.BookPublisherId = book.BookPublisherId;
-                bookToChange.BookPublisher = book.BookPublisher;
-                bookToChange.BookAuthors = book.BookAuthors;
-            }
+            dataStorage.UpdateBookInPublisherList(book);
+            books[books.FindIndex(b => b.BookId.Equals(book.BookId))] = book;
             return book;
         }
-
     }
 }

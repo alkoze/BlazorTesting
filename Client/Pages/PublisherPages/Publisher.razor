@@ -13,6 +13,7 @@
         <tr>
             <th>Publisher Name</th>
             <th>PublisherId</th>
+            <th>Amount of books</th>
             <th>Year Founded</th>
             <th>Year Closed</th>
         </tr>
@@ -22,6 +23,7 @@
             <tr>
                 <td>@publisher.PublisherName </td>
                 <td>@publisher.PublisherId </td>
+                <td>@publisher.PublisherBooks.Count()</td>
                 <td>@publisher.YearFunded </td>
                 <td>@publisher.YearClosed </td>
                 <td><button @onclick="() => Details(publisher.PublisherId)">Details</button></td>
@@ -46,11 +48,6 @@
             </tr>
     </tbody>
 </table>
-
-
-
-
-
 <button @onclick="Add">Add publisher</button>
 
 @code {
@@ -79,7 +76,7 @@
     */
     private async Task Add()
     {
-        Test.Shared.Publisher publisher = new Test.Shared.Publisher { PublisherName = publisherName, YearFunded = founded, YearClosed = closed, PublisherId = null, PublisherBooks = null };
+        Test.Shared.Publisher publisher = new Test.Shared.Publisher { PublisherName = publisherName, YearFunded = founded, YearClosed = closed };
         await Http.PostAsJsonAsync<Test.Shared.Publisher>("publisher", publisher);
         StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
         publisherName = "";
@@ -89,6 +86,7 @@
 
     private async Task Delete(Guid? id)
     {
+     //   await Http.DeleteAsync($"book/publisherbooks/{id}");
         await Http.DeleteAsync($"publisher/{id}");
         StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
     }
