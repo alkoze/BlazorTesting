@@ -21,10 +21,10 @@ namespace Test.Server.Data
             publishers.FindAll(publisher => publisher.PublisherId == id).FirstOrDefault().PublisherBooks.Add(book);
         }
 
-        public void DeleteBookFromPublisher(Guid publisherId, Guid bookId)
+       public void DeleteBookFromPublisher(Guid publisherId, Guid bookId)
         {
-            publishers.FindAll(publisher => publisher.PublisherId == publisherId).FirstOrDefault().
-                PublisherBooks.RemoveAll(book => book.BookId == bookId);
+        //    publishers.FindAll(publisher => publisher.PublisherId == publisherId).FirstOrDefault().
+        //        PublisherBooks.RemoveAll(book => book.BookId == bookId);
         }
 
         public void DeleteBooksWhenPublisherRemoved(Guid publisherId)
@@ -37,14 +37,14 @@ namespace Test.Server.Data
             Book currentBook = books.FindAll(b => b.BookId.Equals(book.BookId)).FirstOrDefault();
             if (!currentBook.BookPublisherId.Equals(book.BookPublisherId))
             {
-                DeleteBookFromPublisher(currentBook.BookPublisherId, currentBook.BookId);
-                AddBookToList(book.BookPublisherId, book);
+                //DeleteBookFromPublisher(currentBook.BookPublisherId, currentBook.BookId);
+                //AddBookToList(book.BookPublisherId, book);
             }
             else
             {
-                List<Book> publisherBooks = publishers.FindAll(publisher => publisher.PublisherId == book.BookPublisherId).FirstOrDefault().PublisherBooks;
-                publishers.FindAll(publisher => publisher.PublisherId == book.BookPublisherId).FirstOrDefault().
-                    PublisherBooks[publisherBooks.FindIndex(b => b.BookId.Equals(book.BookId))] = book;
+                //List<Book> publisherBooks = publishers.FindAll(publisher => publisher.PublisherId == book.BookPublisherId).FirstOrDefault().PublisherBooks;
+                //publishers.FindAll(publisher => publisher.PublisherId == book.BookPublisherId).FirstOrDefault().
+                //    PublisherBooks[publisherBooks.FindIndex(b => b.BookId.Equals(book.BookId))] = book;
             }
         }
     }

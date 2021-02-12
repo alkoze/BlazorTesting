@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 using Test.Shared;
-
+using Microsoft.EntityFrameworkCore;
+using Test.Server.Data;
 
 namespace Test.Server
 {
@@ -28,6 +29,9 @@ namespace Test.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSingleton<StateContainer>();
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDatabaseDeveloperPageExceptionFilter();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
