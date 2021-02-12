@@ -71,22 +71,22 @@
         private async Task AddBook()
         {
             Test.Shared.Book book = new Test.Shared.Book { BookName = bookName, BookPublisherId = publisherId };
-            Test.Shared.Publisher publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"publisher/{book.BookPublisherId}");
-            await Http.PostAsJsonAsync<Test.Shared.Book>("book", book);
-            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("book");
+            Test.Shared.Publisher publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"api/publishers/{book.BookPublisherId}");
+            await Http.PostAsJsonAsync<Test.Shared.Book>("api/books", book);
+            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
             bookName = "";
             publisherId = new Guid();
         }
         private async Task Delete(Guid? id)
         {
             Console.WriteLine("deleting?");
-            await Http.DeleteAsync($"book/{id}");
-            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("book");
+            await Http.DeleteAsync($"api/books/{id}");
+            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
         }
 
         protected override async Task OnInitializedAsync()
         {
-            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("book");
+            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
             StateContainer.OnChange += StateHasChanged;
         }
 

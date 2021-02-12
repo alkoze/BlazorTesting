@@ -9,12 +9,12 @@ namespace Test.Shared
 {
     public class Publisher
     {
-        public Guid PublisherId { get; set; } = Guid.NewGuid();
+        public Guid PublisherId { get; set; }
         public string PublisherName { get; set; } = default!;
 
         public int YearFunded { get; set; } = default!;
 
         public int? YearClosed{ get; set; }
-        public List<Book>? PublisherBooks { get; set; } = new List<Book>();
+        public ICollection<Book> PublisherBooks { get; set; } = new List<Book>();
     }
 }

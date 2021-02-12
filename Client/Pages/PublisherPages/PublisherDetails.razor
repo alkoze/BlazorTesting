@@ -50,7 +50,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"publisher/{id}");
+        publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"api/publishers/{id}");
         nameToEdit = publisher.PublisherName;
         yearFounedToEdit = publisher.YearFunded;
         yearClosedToEdit = publisher.YearClosed;
@@ -61,7 +61,7 @@
         publisher.PublisherName = nameToEdit;
         publisher.YearFunded = yearFounedToEdit;
         publisher.YearClosed = yearClosedToEdit;
-        await Http.PutAsJsonAsync<Test.Shared.Publisher>("publisher", publisher);
+        await Http.PutAsJsonAsync<Test.Shared.Publisher>($"api/publishers/{id}", publisher);
         await OnInitializedAsync();
         // StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
     }

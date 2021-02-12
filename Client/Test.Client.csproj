@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Shared\Test.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\StudentPages\" />
+  </ItemGroup>
+
 </Project>

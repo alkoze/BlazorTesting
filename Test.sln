@@ -9,6 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Client", "Client\Test.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Shared", "Shared\Test.Shared.csproj", "{4D204EF6-55FB-4CF1-989B-72D4105A0E01}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Other", "Other", "{49973A64-FA9E-4837-A661-2451EC4257D3}"
+	ProjectSection(SolutionItems) = preProject
+		Database.md = Database.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

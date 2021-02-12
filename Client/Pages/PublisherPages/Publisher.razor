@@ -77,8 +77,8 @@
     private async Task Add()
     {
         Test.Shared.Publisher publisher = new Test.Shared.Publisher { PublisherName = publisherName, YearFunded = founded, YearClosed = closed };
-        await Http.PostAsJsonAsync<Test.Shared.Publisher>("publisher", publisher);
-        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+        await Http.PostAsJsonAsync<Test.Shared.Publisher>("api/publishers", publisher);
+        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
         publisherName = "";
         founded = 0;
         closed = 0;
@@ -87,13 +87,14 @@
     private async Task Delete(Guid? id)
     {
      //   await Http.DeleteAsync($"book/publisherbooks/{id}");
-        await Http.DeleteAsync($"publisher/{id}");
-        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+        await Http.DeleteAsync($"api/publishers/{id}");
+        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
     }
 
     protected override async Task OnInitializedAsync()
     {
-        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
+        Console.WriteLine(StateContainer.publishers+" asdfghj");
         StateContainer.OnChange += StateHasChanged;
     }
 

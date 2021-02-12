@@ -45,7 +45,7 @@
     {
         book.BookName = nameToEdit;
         book.BookPublisherId = publisherId;
-        await Http.PutAsJsonAsync<Test.Shared.Book>("book", book);
+        await Http.PutAsJsonAsync<Test.Shared.Book>($"api/books/{id}", book);
         await OnInitializedAsync();
     }
 
@@ -56,7 +56,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        book = await Http.GetFromJsonAsync<Test.Shared.Book>($"book/{id}");
+        book = await Http.GetFromJsonAsync<Test.Shared.Book>($"api/books/{id}");
         nameToEdit = book.BookName;
         publisherId = book.BookPublisherId;
     }
