@@ -1,10 +1,14 @@
 ﻿@page "/publisherView/{id:guid}"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-
+@inherits PublisherValidation
 <h3>Publisher details </h3>
-@if (publisher != null)
+@if (_publisher != null)
 {
+<EditForm Model="_publisher" OnValidSubmit="Edit">
+    <DataAnnotationsValidator />
+    <CustomValidator @ref="customValidator" />
+    <ValidationSummary />
     <table class="table">
         <thead>
             <tr>
@@ -17,31 +21,30 @@
         </thead>
         <tbody>
             <tr>
-                <td><input placeholder=@publisher.PublisherName @bind="nameToEdit" /></td>
-                <td><input placeholder=@publisher.YearFunded @bind="yearFounedToEdit" /></td>
-                <td><input placeholder=@publisher.YearClosed @bind="yearClosedToEdit" /></td>
+                <td><InputText placeholder=@_publisher.PublisherName @bind-Value="_publisher.PublisherName" /></td>
+                <td><InputNumber placeholder=@_publisher.YearFunded @bind-Value="_publisher.YearFunded" /></td>
+                <td><InputNumber placeholder=@_publisher.YearClosed @bind-Value="_publisher.YearClosed" /></td>
                 <td>
-                    @foreach (var book in publisher.PublisherBooks)
+                    @foreach (var book in _publisher.PublisherBooks)
                     {
-                        <div><button @onclick="() => BookDetails(book.BookId)" type="button" class="btn btn-link">@book.BookName</button></div>
+                        <div><NavLink class="button" href=@($"/bookView/{book.BookId}")>@book.BookName</NavLink></div>
                     }
-            </td>
-            <td>@publisher.PublisherId</td>
-            <td><button @onclick="Edit">Edit publisher</button></td>
-        </tr>
-    </tbody>
-</table>
+                </td>
+                <td>@_publisher.PublisherId</td>
+                <td><button type="submit">Edit publisher</button></td>
+            </tr>
+        </tbody>
+    </table>
+</EditForm>
 }
 
 @code {
     [Parameter]
     public Guid id { get; set; }
 
-    public Test.Shared.Publisher publisher { get; set; } = null;
+    private CustomValidator customValidator;
 
-    private string nameToEdit;
-    private int yearFounedToEdit;
-    private int? yearClosedToEdit;
+    private Test.Shared.Publisher _publisher = new Test.Shared.Publisher();
 
     private void BookDetails(Guid? id)
     {
@@ -50,19 +53,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"api/publishers/{id}");
-        nameToEdit = publisher.PublisherName;
-        yearFounedToEdit = publisher.YearFunded;
-        yearClosedToEdit = publisher.YearClosed;
+        _publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"api/publishers/{id}");
     }
 
     private async Task Edit()
     {
-        publisher.PublisherName = nameToEdit;
-        publisher.YearFunded = yearFounedToEdit;
-        publisher.YearClosed = yearClosedToEdit;
-        await Http.PutAsJsonAsync<Test.Shared.Publisher>($"api/publishers/{id}", publisher);
-        await OnInitializedAsync();
-        // StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+        if (HandleValidSubmit(customValidator, _publisher))
+        {
+            await Http.PutAsJsonAsync<Test.Shared.Publisher>($"api/publishers/{id}", _publisher);
+            await OnInitializedAsync();
+        }
     }
 }

@@ -1,12 +1,14 @@
 ﻿@page "/bookView/{id:guid}"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject Test.Shared.StateContainer StateContainer
 
 <h3>BookDetails</h3>
 <div>@id</div>
 @if (book != null)
 {
+<EditForm Model="book" OnValidSubmit="@Edit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <table class="table">
         <thead>
             <tr>
@@ -16,48 +18,42 @@
                 <th scope="col">Authors</th>
             </tr>
         </thead>
+
         <tbody>
             <tr>
-                <td><input placeholder=@book.BookName @bind="nameToEdit" /></td>
+                <td><InputText placeholder=@book.BookName @bind-Value="book.BookName" /></td>
                 <td>@book.BookId</td>
                 <td>
-                    <select @bind="publisherId" title="Publisher name">
-                        @foreach (var publisher in StateContainer.publishers)
-                        {
+                    <InputSelect @bind-Value="book.BookPublisherId" title="Publisher name">
+                        @foreach (var publisher in publishers)
+                            {
                             <option value="@publisher.PublisherId">@publisher.PublisherName</option>
-                        }
-                    </select>
+                            }
+                    </InputSelect>
                 </td>
                 <td>Authors</td>
-                <td><button @onclick="Edit">Edit book</button></td>
+                <td><button type="submit">Edit book</button></td>
             </tr>
         </tbody>
+
     </table>
+</EditForm>
 }
 @code {
     [Parameter]
     public Guid id { get; set; }
-    public Test.Shared.Book book { get; set; } = null;
-    private string nameToEdit;
-    private Guid publisherId;
+    public Test.Shared.Book book { get; set; } = new Test.Shared.Book();
+    private List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();
 
     private async Task Edit()
     {
-        book.BookName = nameToEdit;
-        book.BookPublisherId = publisherId;
         await Http.PutAsJsonAsync<Test.Shared.Book>($"api/books/{id}", book);
         await OnInitializedAsync();
-    }
-
-    private void PublisherDetails(Guid id)
-    {
-        NavigationManager.NavigateTo("/publisherView/" + id);
     }
 
     protected override async Task OnInitializedAsync()
     {
         book = await Http.GetFromJsonAsync<Test.Shared.Book>($"api/books/{id}");
-        nameToEdit = book.BookName;
-        publisherId = book.BookPublisherId;
+        publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
     }
 }

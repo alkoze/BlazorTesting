@@ -10,8 +10,8 @@ using Test.Server.Data;
 namespace Test.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210212151115_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210216101931_BookPublisherId")]
+    partial class BookPublisherId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,9 +28,12 @@ namespace Test.Server.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BookName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
-                    b.Property<Guid>("BookPublisherId")
+                    b.Property<Guid?>("BookPublisherId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("BookId");
@@ -88,7 +91,9 @@ namespace Test.Server.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PublisherName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<int?>("YearClosed")
                         .HasColumnType("int");

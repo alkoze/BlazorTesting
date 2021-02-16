@@ -1,97 +1,84 @@
 ﻿@page "/bookView"
+@using Microsoft.AspNetCore.Components.Forms
+
 @inject HttpClient Http
-@inject Test.Shared.StateContainer StateContainer
-@implements IDisposable
 @inject NavigationManager NavigationManager
-    <div>
-        <h3>Book</h3>
+<div>
+    <h3>Book</h3>
 
+    @if (books != null && books.Count() != 0)
+    {
         <table class="table">
-
             <tbody>
-                @if (StateContainer.books != null && StateContainer.books.Count != 0)
-                {
-                    <tr>
-                        <th>Book Name</th>
-                        <th>Book Id</th>
-                        <th>Book Publisher</th>
-                    </tr>
-                }
-                @foreach (var book in StateContainer.books)
-                {
-            <tr>
-                <td>@book.BookName </td>
-                <td>@book.BookId </td>
-                <td><button @onclick="() => PublisherDetails(book.BookPublisherId)" type="button" class="btn btn-link">@book.BookPublisher.PublisherName</button></td>
-                <td><button @onclick="() => Details(book.BookId)">Details</button></td>
-                <td><button @onclick="() => Delete(book.BookId)">Delete book</button></td>
-            </tr>
-                }
-            </tbody>
-        </table>
-        <table class="table">
-            <thead>
                 <tr>
                     <th>Book Name</th>
+                    <th>Book Id</th>
                     <th>Book Publisher</th>
                 </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input placeholder="Book Name" @bind="bookName" /></td>
-                    <td>
-                        <select @bind="publisherId" title="Publisher name">
-                            @foreach(var publisher in StateContainer.publishers)
-                            {
-                                <option value="@publisher.PublisherId">@publisher.PublisherName</option>
-                            }
-                        </select>
-                    </td>
-                </tr>
+                @foreach (var book in books)
+                {
+                    var bookId = book.BookId;
+                    <tr>
+                        <td><NavLink class="button" href=@($"/bookView/{book.BookId}")>@book.BookName</NavLink></td>
+                        <td>@book.BookId </td>
+                        <td><NavLink class="button" href=@($"/publisherView/{book.BookPublisherId}")>@book.BookPublisher.PublisherName</NavLink></td>
+                        <td><button class="button" @onclick="(() => Delete(book.BookId))">Delete book</button></td>
+                    </tr>
+                }
             </tbody>
         </table>
-        <button @onclick="AddBook">Add book</button>
-    </div>
+    }
+
+<EditForm Model="_book" OnValidSubmit="@AddBook">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Book Publisher</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><InputText placeholder="Book Name" @bind-Value="_book.BookName" /></td>
+                <td>
+                    <InputSelect @bind-Value="_book.BookPublisherId" DisplayName="Publisher name">
+                        <option>Select publisher</option>
+                        @foreach (var publisher in publishers)
+                        {
+                            <option value="@publisher.PublisherId">@publisher.PublisherName</option>
+                        }
+                    </InputSelect>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="submit">Submit</button>
+</EditForm>
+    
+</div>
     @code {
         private List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();
-        private string bookName;
-        private Guid publisherId;
-        //private Publisher publisher;
-
-        private void PublisherDetails(Guid? id)
-        {
-            NavigationManager.NavigateTo("/publisherView/" + id);
-        }
-
-        private void Details(Guid? id)
-        {
-            NavigationManager.NavigateTo("/bookview/" + id);
-        }
+        private List<Test.Shared.Book> books = new List<Test.Shared.Book>();
+        private Test.Shared.Book _book = new Test.Shared.Book();
 
         private async Task AddBook()
         {
-            Test.Shared.Book book = new Test.Shared.Book { BookName = bookName, BookPublisherId = publisherId };
-            Test.Shared.Publisher publisher = await Http.GetFromJsonAsync<Test.Shared.Publisher>($"api/publishers/{book.BookPublisherId}");
-            await Http.PostAsJsonAsync<Test.Shared.Book>("api/books", book);
-            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
-            bookName = "";
-            publisherId = new Guid();
+            await Http.PostAsJsonAsync<Test.Shared.Book>("api/books", _book);
+            books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
+            _book = new Test.Shared.Book();
         }
+
         private async Task Delete(Guid? id)
         {
-            Console.WriteLine("deleting?");
             await Http.DeleteAsync($"api/books/{id}");
-            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
+            books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
         }
 
         protected override async Task OnInitializedAsync()
         {
-            StateContainer.books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
-            StateContainer.OnChange += StateHasChanged;
-        }
-
-        public void Dispose()
-        {
-            StateContainer.OnChange -= StateHasChanged;
+            books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
+            publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
         }
     }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Test.Server.Data;
 
 namespace Test.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210216085902_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,11 +29,9 @@ namespace Test.Server.Migrations
 
                     b.Property<string>("BookName")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("BookPublisherId")
-                        .IsRequired()
+                    b.Property<Guid>("BookPublisherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("BookId");
@@ -93,7 +93,7 @@ namespace Test.Server.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<int?>("YearClosed")
+                    b.Property<int>("YearClosed")
                         .HasColumnType("int");
 
                     b.Property<int>("YearFunded")

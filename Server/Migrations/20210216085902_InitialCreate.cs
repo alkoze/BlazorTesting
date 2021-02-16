@@ -25,9 +25,9 @@ namespace Test.Server.Migrations
                 columns: table => new
                 {
                     PublisherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PublisherName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PublisherName = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
                     YearFunded = table.Column<int>(type: "int", nullable: false),
-                    YearClosed = table.Column<int>(type: "int", nullable: true)
+                    YearClosed = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,7 +54,7 @@ namespace Test.Server.Migrations
                 columns: table => new
                 {
                     BookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BookName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BookName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BookPublisherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

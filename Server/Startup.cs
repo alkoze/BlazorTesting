@@ -28,7 +28,6 @@ namespace Test.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
-            services.AddSingleton<StateContainer>();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
