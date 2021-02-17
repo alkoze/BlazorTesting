@@ -3,36 +3,23 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Test.Server.Data;
 
 namespace Test.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210217071131_BookAuthors")]
+    partial class BookAuthors
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.3");
-
-            modelBuilder.Entity("AuthorBook", b =>
-                {
-                    b.Property<Guid>("AuthorsAuthorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BooksBookId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AuthorsAuthorId", "BooksBookId");
-
-                    b.HasIndex("BooksBookId");
-
-                    b.ToTable("AuthorBook");
-                });
 
             modelBuilder.Entity("Test.Shared.Author", b =>
                 {
@@ -186,21 +173,6 @@ namespace Test.Server.Migrations
                     b.ToTable("Student");
                 });
 
-            modelBuilder.Entity("AuthorBook", b =>
-                {
-                    b.HasOne("Test.Shared.Author", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorsAuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Test.Shared.Book", null)
-                        .WithMany()
-                        .HasForeignKey("BooksBookId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Test.Shared.Book", b =>
                 {
                     b.HasOne("Test.Shared.Publisher", "BookPublisher")
@@ -215,15 +187,15 @@ namespace Test.Server.Migrations
             modelBuilder.Entity("Test.Shared.BookAuthor", b =>
                 {
                     b.HasOne("Test.Shared.Author", "Author")
-                        .WithMany("BookAuthors")
+                        .WithMany("Books")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Test.Shared.Book", "Book")
                         .WithMany("BookAuthors")
                         .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -252,7 +224,7 @@ namespace Test.Server.Migrations
 
             modelBuilder.Entity("Test.Shared.Author", b =>
                 {
-                    b.Navigation("BookAuthors");
+                    b.Navigation("Books");
                 });
 
             modelBuilder.Entity("Test.Shared.Book", b =>

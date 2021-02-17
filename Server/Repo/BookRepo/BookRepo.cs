@@ -29,7 +29,18 @@ namespace Test.Server.Repo.BookRepo
                     PublisherName = book.BookPublisher.PublisherName,
                     YearFunded = book.BookPublisher.YearFunded,
                     YearClosed = book.BookPublisher.YearClosed
-                }
+                },
+                BookAuthors = book.BookAuthors.Select(bookauthor => new BookAuthor() { 
+                    BookAuthorId = bookauthor.BookAuthorId,
+                    AuthorId = bookauthor.AuthorId
+                }).ToList(),
+                Authors = book.BookAuthors.Select(bookAuthor => bookAuthor.Author).Select(author => new Author(){
+                    AuthorId = author.AuthorId,
+                    FirstName = author.FirstName,
+                    LastName = author.LastName,
+                    YearBorn = author.YearBorn,
+                    YearDied = author.YearDied
+                }).ToList()
             }).ToListAsync();
             if (id != null)
             {

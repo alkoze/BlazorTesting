@@ -1,6 +1,6 @@
 ﻿@page "/bookView"
 @using Microsoft.AspNetCore.Components.Forms
-
+@using Test.Shared 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 <div>
@@ -13,6 +13,7 @@
                 <tr>
                     <th>Book Name</th>
                     <th>Book Id</th>
+                    <th>Book author</th>
                     <th>Book Publisher</th>
                 </tr>
                 @foreach (var book in books)
@@ -21,6 +22,12 @@
                     <tr>
                         <td><NavLink class="button" href=@($"/bookView/{book.BookId}")>@book.BookName</NavLink></td>
                         <td>@book.BookId </td>
+                        <td>
+                            @foreach(var author in book.Authors)
+                    {
+                        <div>@author.FullName</div>
+                    }
+                        </td>
                         <td><NavLink class="button" href=@($"/publisherView/{book.BookPublisherId}")>@book.BookPublisher.PublisherName</NavLink></td>
                         <td><button class="button" @onclick="(() => Delete(book.BookId))">Delete book</button></td>
                     </tr>
@@ -37,6 +44,7 @@
             <tr>
                 <th>Book Name</th>
                 <th>Book Publisher</th>
+                <th scopr="col">Authors</th>
             </tr>
         </thead>
         <tbody>
@@ -51,6 +59,12 @@
                         }
                     </InputSelect>
                 </td>
+                <td>
+                    @foreach (var author in authors)
+                    {
+                        <div><input type="checkbox" @onchange="EventArgs => CheckBoxClicked(author.AuthorId, EventArgs.Value)" />@author.FullName</div>
+                    }
+                </td>
             </tr>
         </tbody>
     </table>
@@ -61,13 +75,25 @@
     @code {
         private List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();
         private List<Test.Shared.Book> books = new List<Test.Shared.Book>();
+        private List<Author> authors { get; set; } = new List<Author>();
         private Test.Shared.Book _book = new Test.Shared.Book();
+        private List<Guid> AuthorIds { get; set; } = new List<Guid>();
 
         private async Task AddBook()
         {
-            await Http.PostAsJsonAsync<Test.Shared.Book>("api/books", _book);
-            books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
+            var responce = await Http.PostAsJsonAsync<Test.Shared.Book>("api/books", _book);
+            var book = responce.Content.ReadAsAsync<Book>().Result;
+            foreach (Guid authorId in AuthorIds)
+            {
+                BookAuthor bookAuthor = new BookAuthor
+                {
+                    BookId = book.BookId,
+                    AuthorId = authorId
+                };
+                await Http.PostAsJsonAsync<BookAuthor>("api/bookauthors", bookAuthor);
+            }
             _book = new Test.Shared.Book();
+            books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
         }
 
         private async Task Delete(Guid? id)
@@ -80,5 +106,25 @@
         {
             books = await Http.GetFromJsonAsync<List<Test.Shared.Book>>("api/books");
             publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
+            authors = await Http.GetFromJsonAsync<List<Author>>("api/authors");
+        }
+
+        private void CheckBoxClicked(Guid id, object checkedValue)
+        {
+            Console.WriteLine("Am here " + id);
+            if ((bool)checkedValue)
+            {
+                if (!AuthorIds.Contains(id))
+                {
+                    AuthorIds.Add(id);
+                }
+            }
+            else
+            {
+                if (AuthorIds.Contains(id))
+                {
+                    AuthorIds.Remove(id);
+                }
+            }
         }
     }

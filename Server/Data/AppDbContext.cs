@@ -39,6 +39,20 @@ namespace Test.Server.Data
                 .WithOne(b => b.BookPublisher)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Author>()
+                .HasMany(a => a.BookAuthors)
+                .WithOne(b => b.Author)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Book>()
+                .HasMany(b => b.BookAuthors)
+                .WithOne(a => a.Book)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
+
+        public DbSet<Test.Shared.Author> Author { get; set; }
+
+        public DbSet<Test.Shared.BookAuthor> BookAuthor { get; set; }
     }
 }

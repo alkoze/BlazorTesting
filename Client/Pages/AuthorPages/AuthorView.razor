@@ -1,0 +1,122 @@
+﻿@page "/authorView"
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient Http
+@using Test.Shared
+
+<h3>AuthorView</h3>
+
+@if (authors.Count() != 0)
+{
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Author Name</th>
+                <th>Author Id</th>
+                <th>Author Books</th>
+                <th>Author born</th>
+                <th>Author died</th>
+            </tr>
+            @foreach (var author in authors)
+            {
+                <tr>
+                    <td>@author.FullName</td>
+                    <td>@author.AuthorId</td>
+                    <td>@foreach (var book in author.Books) 
+                    {
+                        <div><NavLink class="button" href=@($"/bookView/{book.BookId}")>@book.BookName</NavLink></div>
+                    }
+                    </td>
+                    <td>@author.YearBorn</td>
+                    <td>@author.YearDied</td>
+                    <td><button class="button" @onclick="(() => DeleteAuthor(author.AuthorId))">Delete author</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<EditForm Model="_author" OnValidSubmit="@AddAuthor">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Author firstname</th>
+                <th scope="col">Author lastname</th>
+                <th scope="col">Year born</th>
+                <th scope="col">Year Died</th>
+                <th scopr="col">Books</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><InputText placeholder="Author firstname" @bind-Value="_author.FirstName" /></td>
+                <td><InputText placeholder="Author lastname" @bind-Value="_author.LastName" /></td>
+                <td><InputNumber placeholder="Year born" @bind-Value="_author.YearBorn"></InputNumber></td>
+                <td><InputNumber placeholder="Year died" @bind-Value="_author.YearDied"></InputNumber></td>
+                <td>
+                    @foreach (var book in books)
+                    {
+                        <div><input type="checkbox" @onchange="EventArgs => CheckBoxClicked(book.BookId, EventArgs.Value)" />@book.BookName</div>
+                    }
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="submit">Submit</button>
+</EditForm>
+
+@code {
+    private List<Author> authors { get; set; } = new List<Author>();
+    private List<Book> books { get; set; } = new List<Book>();
+    private Author _author { get; set; } = new Author();
+    private BookAuthor _bookAuthor { get; set; } = new BookAuthor();
+    public List<Guid> BooksIds { get; set; } = new List<Guid>();
+
+    private async Task AddAuthor()
+    {
+        var responce = await Http.PostAsJsonAsync<Author>("api/authors", _author);
+        var author = responce.Content.ReadAsAsync<Author>().Result;
+        foreach (Guid bookId in BooksIds)
+        {
+            BookAuthor bookAuthor = new BookAuthor
+            {
+                BookId = bookId,
+                AuthorId = author.AuthorId
+            };
+            await Http.PostAsJsonAsync<BookAuthor>("api/bookauthors", bookAuthor);
+        }
+        _author = new Author();
+        authors = await Http.GetFromJsonAsync<List<Author>>("api/authors");
+    }
+
+    private async Task DeleteAuthor(Guid id)
+    {
+        await Http.DeleteAsync($"api/authors/{id}");
+        authors = await Http.GetFromJsonAsync<List<Author>>("api/authors");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        authors = await Http.GetFromJsonAsync<List<Author>>("api/authors");
+        books = await Http.GetFromJsonAsync<List<Book>>("api/books");
+    }
+
+    private void CheckBoxClicked(Guid id, object checkedValue)
+    {
+        Console.WriteLine("Am here " + id);
+        if((bool)checkedValue)
+        {
+            if (!BooksIds.Contains(id))
+            {
+                BooksIds.Add(id);
+            }
+        }
+        else
+        {
+            if (BooksIds.Contains(id))
+            {
+                BooksIds.Remove(id);
+            }
+        }
+    }
+}

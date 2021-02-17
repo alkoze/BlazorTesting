@@ -18,6 +18,9 @@ namespace Test.Shared
         [Required(ErrorMessage = "Book publisher is required")]
         public Guid? BookPublisherId { get; set; } = null;
         public Publisher? BookPublisher { get; set; }
-        //public ICollection<BookAuthor> BookAuthors { get; set; }
+        
+        public ICollection<BookAuthor>? BookAuthors { get; set; }
+
+        public ICollection<Author>? Authors{ get; set; }
     }
 }

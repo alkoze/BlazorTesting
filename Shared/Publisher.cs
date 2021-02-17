@@ -33,7 +33,7 @@ namespace Test.Shared
             }
             if (YearClosed > DateTime.Now.Year || YearFunded > DateTime.Now.Year)
             {
-                yield return new ValidationResult($"Yearclosed and YearFunded must be less than {DateTime.Now.Year}");
+                yield return new ValidationResult($"Yearclosed and YearFunded must be less than {DateTime.Now.Year + 1}");
             }
         }
     }
