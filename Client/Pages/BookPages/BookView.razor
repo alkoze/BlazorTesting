@@ -25,7 +25,7 @@
                         <td>
                             @foreach(var author in book.Authors)
                     {
-                        <div>@author.FullName</div>
+                        <div><NavLink class="button" href=@($"/authorView/{author.AuthorId}")>@author.FullName</NavLink></div>
                     }
                         </td>
                         <td><NavLink class="button" href=@($"/publisherView/{book.BookPublisherId}")>@book.BookPublisher.PublisherName</NavLink></td>

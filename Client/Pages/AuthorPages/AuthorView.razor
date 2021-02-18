@@ -19,7 +19,7 @@
             @foreach (var author in authors)
             {
                 <tr>
-                    <td>@author.FullName</td>
+                    <td><NavLink class="button" href=@($"/authorView/{author.AuthorId}")>@author.FullName</NavLink></td>
                     <td>@author.AuthorId</td>
                     <td>@foreach (var book in author.Books) 
                     {
@@ -76,6 +76,7 @@
     {
         var responce = await Http.PostAsJsonAsync<Author>("api/authors", _author);
         var author = responce.Content.ReadAsAsync<Author>().Result;
+        //var bookAuthors = new List<BookAuthor>();
         foreach (Guid bookId in BooksIds)
         {
             BookAuthor bookAuthor = new BookAuthor
@@ -84,7 +85,9 @@
                 AuthorId = author.AuthorId
             };
             await Http.PostAsJsonAsync<BookAuthor>("api/bookauthors", bookAuthor);
+            //bookAuthors.Add(bookAuthor);
         }
+        //await Http.PostAsJsonAsync<List<BookAuthor>>("api/bookauthors", bookAuthors);
         _author = new Author();
         authors = await Http.GetFromJsonAsync<List<Author>>("api/authors");
     }

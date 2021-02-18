@@ -34,7 +34,10 @@
                     <td>
                         @foreach (var author in authors)
                         {
-                            <div>@author.FullName <button class="button" @onclick="(() => DeleteAuthor(author.AuthorId))">Delete author</button></div>
+                            <div>
+                                <NavLink class="button" href=@($"/authorView/{author.AuthorId}")>@author.FullName</NavLink> 
+                                <button type="button" class="button" @onclick="(() => DeleteAuthor(author.AuthorId))">Delete author</button>
+                        </div>
                         }
                     <div>
                         <InputSelect @bind-Value="bookAuthor.AuthorId">
@@ -46,7 +49,7 @@
                                         }
                                 }
                         </InputSelect>
-                        <button class="button" @onclick="AddAuthor">Add author</button>
+                        <button type="button" class="button" @onclick="AddAuthor">Add author</button>
                     </div>
                     </td>
                     <td><button type="submit">Edit book</button></td>
@@ -58,7 +61,7 @@
     
 }
 @code {
-    [Parameter]
+[Parameter]
     public Guid id { get; set; }
     public Test.Shared.Book book { get; set; } = new Test.Shared.Book();
     private List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();

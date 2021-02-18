@@ -84,6 +84,19 @@ namespace Test.Server.Controllers
             return CreatedAtAction("GetBookAuthor", new { id = bookAuthor.BookAuthorId }, bookAuthor);
         }
 
+        // POST: api/BookAuthors
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<BookAuthor>> PostBookAuthor(List<BookAuthor> bookAuthors)
+        //{
+        //    foreach (var bookAuthor in bookAuthors)
+        //    {
+        //        _context.BookAuthor.Add(bookAuthor);
+        //    }
+        //    await _context.SaveChangesAsync();
+        //    return CreatedAtAction("GetBookAuthor", bookAuthors);
+        //}
+
         // DELETE: api/BookAuthors/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBookAuthor(Guid id)

@@ -1,9 +1,104 @@
-﻿@page "/authorDetails/{id:guid}"
+﻿@using Test.Shared
+@inject HttpClient Http
+@page "/authorView/{id:guid}"
 
 <h3>AuthorDetails</h3>
+
+@if (author != null)
+{
+    <EditForm Model="author" OnValidSubmit="@Edit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Year born</th>
+                    <th scope="col">Year died</th>
+                    <th scope="col">Published books</th>
+                    <th scope="col">Id</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td><InputText placeholder=@author.FirstName @bind-Value="author.FirstName" /></td>
+                    <td><InputText placeholder=@author.LastName @bind-Value="author.LastName" /></td>
+                    <td><InputNumber placeholder=@author.YearBorn @bind-Value="author.YearBorn" /></td>
+                    <td><InputNumber placeholder=@author.YearDied @bind-Value="author.YearDied" /></td>
+                    <td>
+                        @foreach (var book in booksAuthorHave)
+                        {
+                            <div>@book.BookName <button type="button" class="button" @onclick="(() => DeleteBook(book.BookId))">Delete book</button></div>
+                        }
+                        <div>
+                            <InputSelect @bind-Value="bookAuthor.BookId">
+                                @foreach (var book in books)
+                                    {
+                                    @if (!book.Authors.Any(a => a.AuthorId.Equals(id)))
+                                        {
+                                        <option value="@book.BookId">@book.BookName</option>
+                                        }
+                                    }
+                            </InputSelect>
+                            <button type="button" class="button" @onclick="AddBook">Add book</button>
+                        </div>
+                    </td>
+                    <td>@author.AuthorId</td>
+                    <td><button type="submit">Edit author</button></td>
+                </tr>
+            </tbody>
+
+        </table>
+    </EditForm>
+
+}
 
 @code {
     [Parameter]
     public Guid id { get; set; }
+
+    public Author author { get; set; } = new Test.Shared.Author();
+
+    public ICollection<Book> booksAuthorHave { get; set; } = new List<Book>();
+
+    public BookAuthor bookAuthor { get; set; } = new BookAuthor();
+
+    public List<Book> books { get; set; } = new List<Book>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        author = await Http.GetFromJsonAsync<Author>($"/api/authors/{id}");
+        books = await Http.GetFromJsonAsync<List<Book>>($"/api/books");
+        bookAuthor.AuthorId = id;
+        booksAuthorHave = author.Books;
+    }
+
+    private async Task AddBook()
+    {
+        await Http.PostAsJsonAsync<BookAuthor>($"api/bookauthors", bookAuthor);
+        bookAuthor = new BookAuthor();
+        await OnInitializedAsync();
+    }
+
+    private async Task DeleteBook(Guid id)
+    {
+        foreach (var bookAuthor in author.BookAuthors)
+        {
+            if (bookAuthor.BookId == id)
+            {
+                await Http.DeleteAsync($"api/bookauthors/{bookAuthor.BookAuthorId}");
+                await OnInitializedAsync();
+            };
+        }
+    }
+
+    private async Task Edit()
+    {
+        author.Books = null;
+        await Http.PutAsJsonAsync<Author>($"api/authors/{id}", author);
+        await OnInitializedAsync();
+    }
 
 }
