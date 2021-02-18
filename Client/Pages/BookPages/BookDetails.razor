@@ -1,63 +1,105 @@
 ﻿@page "/bookView/{id:guid}"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject Test.Shared.StateContainer StateContainer
-
+@using Test.Shared
 <h3>BookDetails</h3>
 <div>@id</div>
 @if (book != null)
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Book Id</th>
-                <th scope="col">Publisher</th>
-                <th scope="col">Authors</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input placeholder=@book.BookName @bind="nameToEdit" /></td>
-                <td>@book.BookId</td>
-                <td>
-                    <select @bind="publisherId" title="Publisher name">
-                        @foreach (var publisher in StateContainer.publishers)
+    <EditForm Model="book" OnValidSubmit="@Edit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Book Id</th>
+                    <th scope="col">Publisher</th>
+                    <th scope="col">Authors</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td><InputText placeholder=@book.BookName @bind-Value="book.BookName" /></td>
+                    <td>@book.BookId</td>
+                    <td>
+                        <InputSelect @bind-Value="book.BookPublisherId" title="Publisher name">
+                            @foreach (var publisher in publishers)
+                                {
+                                <option value="@publisher.PublisherId">@publisher.PublisherName</option>
+                                }
+                        </InputSelect>
+                    </td>
+                    <td>
+                        @foreach (var author in authors)
                         {
-                            <option value="@publisher.PublisherId">@publisher.PublisherName</option>
+                            <div>
+                                <NavLink class="button" href=@($"/authorView/{author.AuthorId}")>@author.FullName</NavLink> 
+                                <button type="button" class="button" @onclick="(() => DeleteAuthor(author.AuthorId))">Delete author</button>
+                        </div>
                         }
-                    </select>
-                </td>
-                <td>Authors</td>
-                <td><button @onclick="Edit">Edit book</button></td>
-            </tr>
-        </tbody>
-    </table>
+                    <div>
+                        <InputSelect @bind-Value="bookAuthor.AuthorId">
+                            @foreach (var author in allAuthors)
+                            {
+                                    @if (!author.Books.Any(b => b.BookId.Equals(id)))
+                                    {
+                                <option value="@author.AuthorId">@author.FullName</option>
+                                        }
+                                }
+                        </InputSelect>
+                        <button type="button" class="button" @onclick="AddAuthor">Add author</button>
+                    </div>
+                    </td>
+                    <td><button type="submit">Edit book</button></td>
+                </tr>
+            </tbody>
+
+        </table>
+    </EditForm>
+    
 }
 @code {
-    [Parameter]
+[Parameter]
     public Guid id { get; set; }
-    public Test.Shared.Book book { get; set; } = null;
-    private string nameToEdit;
-    private Guid publisherId;
+    public Test.Shared.Book book { get; set; } = new Test.Shared.Book();
+    private List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();
+    private ICollection<Author> authors { get; set; } = new List<Author>();
+    public List<Author> allAuthors { get; set; } = new List<Author>();
+    public BookAuthor bookAuthor { get; set; } = new BookAuthor();
 
     private async Task Edit()
     {
-        book.BookName = nameToEdit;
-        book.BookPublisherId = publisherId;
-        await Http.PutAsJsonAsync<Test.Shared.Book>("book", book);
+        await Http.PutAsJsonAsync<Test.Shared.Book>($"api/books/{id}", book);
         await OnInitializedAsync();
     }
 
-    private void PublisherDetails(Guid id)
+    private async Task AddAuthor()
     {
-        NavigationManager.NavigateTo("/publisherView/" + id);
+        await Http.PostAsJsonAsync<BookAuthor>($"api/bookauthors", bookAuthor);
+        bookAuthor = new BookAuthor();
+        await OnInitializedAsync();
+    }
+
+    private async Task DeleteAuthor(Guid id)
+    {
+        foreach (var bookAuthor in book.BookAuthors)
+        {
+            if (bookAuthor.AuthorId == id)
+            {
+                await Http.DeleteAsync($"api/bookauthors/{bookAuthor.BookAuthorId}");
+                await OnInitializedAsync();
+            };
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        book = await Http.GetFromJsonAsync<Test.Shared.Book>($"book/{id}");
-        nameToEdit = book.BookName;
-        publisherId = book.BookPublisherId;
+        book = await Http.GetFromJsonAsync<Test.Shared.Book>($"api/books/{id}");
+        allAuthors = await Http.GetFromJsonAsync<List<Author>>($"api/authors");
+        bookAuthor.BookId = id;
+        authors = book.Authors;
+        publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
     }
 }

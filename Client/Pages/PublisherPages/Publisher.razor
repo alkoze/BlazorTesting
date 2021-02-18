@@ -1,104 +1,83 @@
 ﻿@page "/publisherView"
 @inject HttpClient Http
-@inject Test.Shared.StateContainer StateContainer
 @inject NavigationManager NavigationManager
-@implements IDisposable
+@inherits PublisherValidation
 
 <h1>Hello, world!</h1>
-<table class="table">
+@if (publishers != null && publishers.Count() != 0)
+{
+    <table class="table">
 
-    <tbody>
-        @if (StateContainer.publishers != null && StateContainer.publishers.Count != 0)
-        {
-        <tr>
-            <th>Publisher Name</th>
-            <th>PublisherId</th>
-            <th>Amount of books</th>
-            <th>Year Founded</th>
-            <th>Year Closed</th>
-        </tr>
-        }
-        @foreach (var publisher in StateContainer.publishers)
-        {
-            <tr>
-                <td>@publisher.PublisherName </td>
-                <td>@publisher.PublisherId </td>
-                <td>@publisher.PublisherBooks.Count()</td>
-                <td>@publisher.YearFunded </td>
-                <td>@publisher.YearClosed </td>
-                <td><button @onclick="() => Details(publisher.PublisherId)">Details</button></td>
-                <td><button @onclick="() => Delete(publisher.PublisherId)">Delete publisher</button></td>
-            </tr>
-        }
-    </tbody>
-</table>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Publisher Name</th>
-            <th>Year Founded</th>
-            <th>Year closed</th>
-        </tr>
-    </thead>
-    <tbody>
-            <tr>
-                <td><input placeholder="Publisher Name" @bind="publisherName" /></td>
-                <td><input placeholder="Publisher Created" @bind="founded" /></td>
-                <td><input placeholder="Publisher Closed" @bind="closed" /></td>
-            </tr>
-    </tbody>
-</table>
-<button @onclick="Add">Add publisher</button>
+        <tbody>
 
+            <tr>
+                <th>Publisher Name</th>
+                <th>PublisherId</th>
+                <th>Amount of books</th>
+                <th>Year Founded</th>
+                <th>Year Closed</th>
+            </tr>
+
+            @foreach (var publisher in publishers)
+            {
+                <tr>
+                    <td><NavLink class="button" href=@($"/publisherView/{publisher.PublisherId}")>@publisher.PublisherName</NavLink></td>
+                    <td>@publisher.PublisherId </td>
+                    <td>@publisher.PublisherBooks.Count()</td>
+                    <td>@publisher.YearFunded </td>
+                    <td>@publisher.YearClosed </td>
+                    <td><button @onclick="() => Delete(publisher.PublisherId)">Delete publisher</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<EditForm Model="_publisher" OnValidSubmit="@AddPublisher">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Publisher Name</th>
+                <th>Year Founded</th>
+                <th>Year closed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><InputText placeholder="Publisher Name" @bind-Value="_publisher.PublisherName" /></td>
+                <td><InputNumber placeholder="Publisher Created" @bind-Value="_publisher.YearFunded" /></td>
+                <td><InputNumber placeholder="Publisher Closed" @bind-Value="_publisher.YearClosed" /></td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="submit">Add publisher</button>
+</EditForm>
 @code {
-    //private List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();
-    private string publisherName;
-    private int founded;
-    private int closed;
+    private CustomValidator customValidator;
 
-    private void Details(Guid? id)
-    {
-        NavigationManager.NavigateTo("/publisherView/" + id);
-    }
-    /*
-    private void AddPublisher()
-    {
-        StateContainer.publishers.Add(new Test.Shared.Publisher { PublisherName = publisherName, YearFunded = founded, YearClosed = closed, PublisherId = Guid.NewGuid(), PublisherBooks = null });
-        publisherName = "";
-        founded = 0;
-        closed = 0;
-    }
+    private Test.Shared.Publisher _publisher = new Test.Shared.Publisher();
 
-    private void DeletePublisher(Guid? id)
+    public List<Test.Shared.Publisher> publishers = new List<Test.Shared.Publisher>();
+
+    private async Task AddPublisher()
     {
-        StateContainer.RemovePublisher(id);
-    }
-    */
-    private async Task Add()
-    {
-        Test.Shared.Publisher publisher = new Test.Shared.Publisher { PublisherName = publisherName, YearFunded = founded, YearClosed = closed };
-        await Http.PostAsJsonAsync<Test.Shared.Publisher>("publisher", publisher);
-        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
-        publisherName = "";
-        founded = 0;
-        closed = 0;
+        if (HandleValidSubmit(customValidator, _publisher))
+        {
+            await Http.PostAsJsonAsync<Test.Shared.Publisher>("api/publishers", _publisher);
+            await OnInitializedAsync();
+        }
     }
 
     private async Task Delete(Guid? id)
     {
-     //   await Http.DeleteAsync($"book/publisherbooks/{id}");
-        await Http.DeleteAsync($"publisher/{id}");
-        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
+        await Http.DeleteAsync($"api/publishers/{id}");
+        publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
     }
 
     protected override async Task OnInitializedAsync()
     {
-        StateContainer.publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("publisher");
-        StateContainer.OnChange += StateHasChanged;
-    }
-
-    public void Dispose()
-    {
-        StateContainer.OnChange -= StateHasChanged;
+        publishers = await Http.GetFromJsonAsync<List<Test.Shared.Publisher>>("api/publishers");
+        _publisher = new Test.Shared.Publisher();
     }
 }

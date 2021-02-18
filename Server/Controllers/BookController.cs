@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Test.Shared;
-using StateContainer = Test.Shared.StateContainer;
 using System.Net.Http;
 using System.Net.Http.Json;
 using Test.Server.Data;
@@ -27,15 +26,15 @@ namespace Test.Server.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Book> Create(Book book)
-        {
-            Publisher publisher = dataStorage.GetPublisher(book.BookPublisherId);
-            book.BookPublisher.PublisherId = publisher.PublisherId;
-            book.BookPublisher.PublisherName = publisher.PublisherName;
-            books.Add(book);
-            dataStorage.AddBookToList(book.BookPublisherId, book);
-            return book;
-        }
+        //public ActionResult<Book> Create(Book book)
+        //{
+        //    Publisher publisher = dataStorage.GetPublisher(book.BookPublisherId);
+        //    book.BookPublisher.PublisherId = publisher.PublisherId;
+        //    book.BookPublisher.PublisherName = publisher.PublisherName;
+        //    books.Add(book);
+        //    dataStorage.AddBookToList(book.BookPublisherId, book);
+        //    return book;
+        //}
         [HttpGet]
         public IList<Book> Get()
         {
@@ -47,13 +46,13 @@ namespace Test.Server.Controllers
             return books.FindAll(book => book.BookId == id).FirstOrDefault();
         }
         [HttpDelete("{id}")]
-        public ActionResult<string> Delete(Guid id)
-        {
-            Book book = books.FindAll(book => book.BookId == id).FirstOrDefault();
-            dataStorage.DeleteBookFromPublisher(book.BookPublisherId, id);
-            books.RemoveAll(book => book.BookId == id);
-            return "Deleted";
-        }
+        //public ActionResult<string> Delete(Guid id)
+        //{
+        //    Book book = books.FindAll(book => book.BookId == id).FirstOrDefault();
+        //    dataStorage.DeleteBookFromPublisher(book.BookPublisherId, id);
+        //    books.RemoveAll(book => book.BookId == id);
+        //    return "Deleted";
+        //}
         [HttpPut]
         public ActionResult<Book> Put(Book book)
         {
